@@ -1,3 +1,19 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
-# Create your views here.
+from reviews.models import Category, Genre, Title
+
+
+class GenresViewSet(viewsets.ModelViewSet):
+    """VewSet для жанров"""
+    queryset = Genre.objects.all()
+
+
+class CategoriesViewSet(viewsets.ModelViewSet):
+    """ViewSet для категорий"""
+    queryset = Category.objects.all()
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """ViewSet для произведений."""
+    queryset = Title.objects.all()
