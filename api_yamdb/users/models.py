@@ -1,3 +1,6 @@
+import string
+import random
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -8,18 +11,20 @@ ROLES = (
         ('moderator', 'Модератор'),
 )
 
+CODE_LENGTH = 12
+
+
+def generate_conf_code(length):
+    conf_code = ''.join(
+        [random.choice(
+            string.ascii_uppercase + string.digits
+        )for num in range(length)]
+    )
+    return conf_code
+
 
 class User(AbstractUser):
-    role = models.CharField(
-        'Роль пользователя',
-        max_length=25,
-        choices=ROLES,
-        default='user'
-    )
-    bio = models.TextField(
-        'О себе',
-        blank=True
-    ),
+    username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(
         'Адрес электронной почты',
         max_length=254,
@@ -27,10 +32,23 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
+    first_name = models.CharField('Имя', max_length=150)
+    last_name = models.CharField('Фамилия', max_length=150)
+    bio = models.TextField(
+        'О себе',
+        blank=True
+    )
+    role = models.CharField(
+        'Роль пользователя',
+        max_length=25,
+        choices=ROLES,
+        default='user'
+    )
     confirmation_code = models.CharField(
         'Код подтверждения',
         max_length=50,
-        null=True
+        null=True,
+        default=generate_conf_code(CODE_LENGTH)
     )
 
     @property
