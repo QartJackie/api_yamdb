@@ -5,10 +5,25 @@ from .models import User
 
 
 class GetTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=50, required=True)
+    username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
-    def validate(self, username):
-        if not User.objects.filter(username=username).exists():
+    def validate(self, data):
+        if not User.objects.filter(username=data['username']).exists():
             raise FieldError('Неверное имя пользователя')
-        return username
+        return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email']
+        )
+        return user
+
+    class Meta:
+        model = User
+        fields = ('email', 'username')
