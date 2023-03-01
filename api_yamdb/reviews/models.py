@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from users.models import User
+
 
 class Category(models.Model):
     """Модель категории."""
@@ -63,7 +65,7 @@ class Title(models.Model):
 
     def __str__(self):
         return f'{self.name}({self.year})'
-		
+
 
 class Review(models.Model):
     title_id = models.ForeignKey(
@@ -88,4 +90,3 @@ class Comment(models.Model):
     text = models.TextField()
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
-
