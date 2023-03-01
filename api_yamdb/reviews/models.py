@@ -4,6 +4,8 @@ from users.models import User
 
 from users.models import User
 
+from users.models import User
+
 
 class Category(models.Model):
     """Модель категории."""
@@ -85,6 +87,18 @@ class Review(models.Model):
         MinValueValidator(1), MaxValueValidator(10)],
         error_messages={'required': 'Введите оценку от 1 до 10.'})
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['author', 'title'],
+                                    name='unique_author_title')
+        ]
+        ordering = ['-pub_date']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+
+    def __str__(self):
+        return self.text
+
 
 class Comment(models.Model):
     author = models.ForeignKey(
@@ -97,6 +111,11 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
+
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
         return self.text
