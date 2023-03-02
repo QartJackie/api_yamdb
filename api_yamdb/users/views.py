@@ -4,9 +4,12 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
+from rest_framework import viewsets
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.filters import SearchFilter
 
 from .models import User
-from .serializers import GetTokenSerializer, UserSerializer
+from .serializers import GetTokenSerializer, UserSerializer, UserSearchSerializer
 
 
 def send_email(email, username):
@@ -57,3 +60,20 @@ class APISignUp(APIView):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class APIUser(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    lookup_field = 'username'
+    serializer_class = UserSearchSerializer
+#    permission_classes = только админ
+    pagination_class = LimitOffsetPagination
+    filter_backends = (SearchFilter,)
+    search_fields = ('username') 
+
+    def perform_create(self, serializer):
+        serializer.save(username=serializer.validated_data['username'], email=serializer.validated_data['email'])
+
+
+
+    
