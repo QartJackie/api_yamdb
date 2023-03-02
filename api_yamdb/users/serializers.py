@@ -32,4 +32,6 @@ class UserSerializer(serializers.ModelSerializer):
 class UserSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'role', 'bio')
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'role', 'bio'
+        )

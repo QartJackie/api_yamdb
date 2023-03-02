@@ -1,15 +1,24 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.mail import send_mail
-from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import SearchFilter
+from rest_framework.permissions import AllowAny
+from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
 
+from .permissions import IsAdmin, IsAuthorOrReadOnly
 from .models import User
-from .serializers import GetTokenSerializer, UserSerializer, UserSearchSerializer
+from .serializers import (
+    GetTokenSerializer, UserSerializer, UserSearchSerializer
+)
+
+
+class EnablePartialUpdateMixin:
+    def patch(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
 
 
 def send_email(email, username):
@@ -18,12 +27,14 @@ def send_email(email, username):
     send_mail(
         subject='Код подтверждения',
         message=f'Ваш код {conf_code}',
-        from_email=0,
+        from_email="admin@yamdb.com",
         recipient_list=[email]
     )
 
 
 class APIGetToken(APIView):
+    permission_classes = (AllowAny,)
+
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -46,6 +57,8 @@ class APIGetToken(APIView):
 
 
 class APISignUp(APIView):
+    permission_classes = (AllowAny,)
+
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -66,14 +79,25 @@ class APIUser(viewsets.ModelViewSet):
     queryset = User.objects.all()
     lookup_field = 'username'
     serializer_class = UserSearchSerializer
-#    permission_classes = только админ
+    permission_classes = (IsAdmin,)
     pagination_class = LimitOffsetPagination
     filter_backends = (SearchFilter,)
-    search_fields = ('username') 
+    search_fields = ('username')
 
     def perform_create(self, serializer):
-        serializer.save(username=serializer.validated_data['username'], email=serializer.validated_data['email'])
+        serializer.save(
+            username=serializer.validated_data['username'],
+            email=serializer.validated_data['email']
+        )
 
 
+class APIMe(EnablePartialUpdateMixin, viewsets.ModelViewSet):
+    serializer_class = UserSearchSerializer
+    lookup_field = 'username'
+    queryset = User.objects.all()
+    permission_classes = (IsAuthorOrReadOnly,)
 
-    
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.get(username=self.request.user.username)
+        return obj

@@ -32,8 +32,12 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
-    first_name = models.CharField('Имя', max_length=150)
-    last_name = models.CharField('Фамилия', max_length=150)
+    first_name = models.CharField(
+        'Имя', max_length=150, blank=True, null=True
+    )
+    last_name = models.CharField(
+        'Фамилия', max_length=150, blank=True, null=True
+    )
     bio = models.TextField(
         'О себе',
         blank=True
