@@ -44,7 +44,11 @@ class APIGetToken(APIView):
             User,
             username=username,
         )
-        print(serializer.data)
+        if not User.objects.filter(username=username).exists():
+            return Response(
+                'Пользователь с таким именем не существует',
+                status=status.HTTP_404_NOT_FOUND
+            )
         if user.confirmation_code != confirmation_code:
             return Response(
                 'Неверный код',
@@ -62,8 +66,17 @@ class APISignUp(APIView):
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            if User.objects.filter(
+                email=request.data['email'], username=request.data['username']
+            ).exists():
+                return Response(status=status.HTTP_200_OK)
+            elif User.objects.filter(email=request.data['email']).exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            elif User.objects.filter(
+                username=request.data['username']
+            ).exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-            print(serializer.data)
             send_email(serializer.data['email'], serializer.data['username'])
             return Response(
                 {
@@ -85,10 +98,10 @@ class APIUser(viewsets.ModelViewSet):
     search_fields = ('username')
 
     def perform_create(self, serializer):
-        serializer.save(
-            username=serializer.validated_data['username'],
-            email=serializer.validated_data['email']
-        )
+        username = serializer.validated_data.get('username')
+        if '|' in username:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
 
 class APIMe(EnablePartialUpdateMixin, viewsets.ModelViewSet):
