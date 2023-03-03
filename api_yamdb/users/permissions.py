@@ -1,4 +1,9 @@
 from rest_framework import permissions
+"""Нужны першмишены, которые дадут
+оступы по докам. Либо админу, либо
+модератору и админу, либо только чтение.
+По идее хватит 2 пермишшенов,
+но нужно уточнить и обсудить."""
 
 
 class IsAdmin(permissions.BasePermission):
@@ -8,6 +13,18 @@ class IsAdmin(permissions.BasePermission):
         return (
             request.user.is_authenticated
             and request.user.is_admin or request.user.is_superuser
+        )
+
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    message = 'Недостаточно прав'
+
+    def has_permission(self, request, view):
+        return (
+            (
+                request.user.is_authenticated
+                and (request.user.is_admin or request.user.is_superuser)
+            ) or request.method in permissions.SAFE_METHODS
         )
 
 

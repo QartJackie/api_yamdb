@@ -1,13 +1,66 @@
+import datetime as dt
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Review, Comment, User
+from reviews.models import Category,  Comment, Genre, Review, Title
+
+
+class CustomSlugRelatedField(serializers.SlugRelatedField):
+
+    def to_representation(self, obj):
+        return {
+            "name": obj.name,
+            "slug": obj.slug
+        }
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для категорий."""
+
+    class Meta:
+        model = Category
+        fields = ('name', 'slug')
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для жанров."""
+
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для произведений."""
+    category = CustomSlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all(), many=False
+    )
+    genre = CustomSlugRelatedField(
+        slug_field='slug', queryset=Genre.objects.all(), many=True
+    )
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
+
+    def validate_year(self, value):
+        current_year = dt.date.today().year
+        if not 0 < value <= current_year:
+            raise serializers.ValidationError(
+                'Размещение не вышедшего материала не возможно.'
+            )
+        return value
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
-    
+
     class Meta:
         model = Review
         fields = ('id', 'title', 'author', 'pub_date', 'text', 'score', )
