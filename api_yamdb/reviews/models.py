@@ -14,11 +14,13 @@ class Category(models.Model):
     )
 
     class Meta:
+        """Настройка отображения объектов."""
         ordering = ('name',)
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
     def __str__(self):
+        """Строковое отображение модели."""
         return self.name
 
 
@@ -33,11 +35,13 @@ class Genre(models.Model):
     )
 
     class Meta:
+        """Настройка отображения объектов."""
         ordering = ('name',)
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
     def __str__(self):
+        """Строковое отображение модели."""
         return self.name
 
 
@@ -54,18 +58,19 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         blank=True,
-        null=True,
         related_name='titles',
         verbose_name='Жанр'
     )
     year = models.IntegerField('Год публикации')
 
     class Meta:
+        """Настройка отображения объектов."""
         ordering = ['-year']
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
     def __str__(self):
+        """Строковое отображение объектов."""
         return f'{self.name}({self.year})'
 
 
@@ -85,6 +90,7 @@ class Review(models.Model):
         error_messages={'required': 'Введите оценку от 1 до 10.'})
 
     class Meta:
+        """Настройка уникальности и отображения объектов."""
         constraints = [
             models.UniqueConstraint(fields=['author', 'title'],
                                     name='unique_author_title')
@@ -94,10 +100,12 @@ class Review(models.Model):
         verbose_name_plural = 'Отзывы'
 
     def __str__(self):
+        """Строковое отображение модели."""
         return self.text
 
 
 class Comment(models.Model):
+    """Модель комментария."""
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
@@ -110,9 +118,11 @@ class Comment(models.Model):
     )
 
     class Meta:
+        """Настройка отображения объектов."""
         ordering = ['-pub_date']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
+        """Строковое отображение модели."""
         return self.text
