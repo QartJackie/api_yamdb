@@ -46,7 +46,41 @@ class UserSearchSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, validated_data):
-        if validated_data['username'] == 'me':
+        username = validated_data.get('username', None)
+        if username == 'me':
+            raise ValidationError('Данное имя недоступно')
+        return validated_data
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            **validated_data
+        )
+        return user
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'role', 'bio'
+        )
+
+
+class MeSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        max_length=254,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.SlugField(
+        required=True, max_length=150,
+        validators=[
+            UniqueValidator(queryset=User.objects.all()),
+        ]
+    )
+#    role = serializers.CharField(choices=ROLES)
+
+    def validate(self, validated_data):
+        username = validated_data.get('username', None)
+        if username == 'me':
             raise ValidationError('Данное имя недоступно')
         return validated_data
 
@@ -62,3 +96,4 @@ class UserSearchSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'role', 'bio'
         )
+        read_only_fields = ('role',)
