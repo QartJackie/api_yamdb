@@ -1,6 +1,7 @@
 id,username,email,role,bio,first_name,last_name
-100,bingobongo,bingobongo@yamdb.fake,user,,,
-101,capt_obvious,capt_obvious@yamdb.fake,admin,,,
-102,faust,faust@yamdb.fake,user,,,
-103,reviewer,reviewer@yamdb.fake,user,,,
-104,angry,angry@yamdb.fake,moderator,,,
+1,bb,kazoobazoo@yandex.ru,user,,,
+100,bingobongo,kazoobazoo@yandex.ru,user,,,
+101,capt_obvious,kazoobazoo@yandex.ru,admin,,,
+102,faust,kazoobazoo@yandex.ru,user,,,
+103,reviewer,kazoobazoo@yandex.ru,user,,,
+104,angry,kazoobazoo@yandex.ru,moderator,,,

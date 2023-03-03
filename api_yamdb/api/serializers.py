@@ -4,16 +4,14 @@ from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Review, Comment, User
 
 class ReviewSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
     
     class Meta:
         model = Review
-        fields = ('id', 'title', 'author', 'pub_date', 'text', 'score',
-                  'rating')
-        read_only_fields = ('title', 'author', 'pub_date', 'rating', )
+        fields = ('id', 'title', 'author', 'pub_date', 'text', 'score', )
+        read_only_fields = ('title', 'author', 'pub_date', )
         validators = [
             UniqueTogetherValidator(
                 queryset=Review.objects.all(),
