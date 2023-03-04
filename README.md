@@ -2,10 +2,6 @@
 
 ### Проект Yamdb API - это интерфейс, предназначенный для доступа к отзывам на произведения.**
 
-
-
-
-
 **О проекте**
 
 <br>
@@ -23,9 +19,10 @@
  
 ![Djoser: 2.1.0 (shields.io)](https://img.shields.io/badge/Djoser-2.1.0-blue) ![JSON: (shields.io)](https://img.shields.io/badge/JSON-%20-lightgrey) ![Django-filters: 22.1 (shields.io)](https://img.shields.io/badge/django--filters-22.1-green) 
 ![Pandas: 1.3.5 (shields.io)](https://img.shields.io/badge/Pandas-1.3.5-red) ![Licence: BSD (shields.io)](https://img.shields.io/badge/Licence-BSD-orange)
-<br>
-<hr>
 
+<br>
+
+<hr>
 
 
 ## Развернуть проект
@@ -40,6 +37,7 @@ Cоздать и активировать виртуальное окружен�
 	$ python3 -m venv venv*
 
 	$ source venv/bin/activate*
+
 или
 
 	python -m venv venv
