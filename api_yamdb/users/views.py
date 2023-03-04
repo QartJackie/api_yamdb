@@ -67,10 +67,19 @@ class APISignUp(APIView):
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            email = request.data['email']
             if User.objects.filter(
                 email=request.data['email'], username=request.data['username']
             ).exists():
-                return Response(status=status.HTTP_200_OK)
+                send_email(
+                    email=request.data['email'],
+                    username=request.data['username']
+                )
+                return Response(
+                    'Данный пользователь уже существует,'
+                    f'Вам на почту {email} отправлен код подтверждения',
+                    status=status.HTTP_200_OK
+                )
             elif User.objects.filter(email=request.data['email']).exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             elif User.objects.filter(
