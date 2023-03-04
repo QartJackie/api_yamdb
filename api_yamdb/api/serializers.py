@@ -1,5 +1,4 @@
 import datetime as dt
-
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -7,7 +6,7 @@ from reviews.models import Category,  Comment, Genre, Review, Title
 
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
-
+    """Кастомный сериализатор с репрезентацией."""
     def to_representation(self, obj):
         return {
             "name": obj.name,
@@ -19,16 +18,23 @@ class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий."""
 
     class Meta:
+        """Настройка сериализатора."""
         model = Category
         fields = ('name', 'slug')
+        lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанров."""
 
     class Meta:
+        """Настройка сериализатора."""
         model = Genre
         fields = ('name', 'slug')
+        lookup_field = 'slug'
+        extra_kwargs = {
+            'url': {'lookup_field': 'slug'}
+        }
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -42,13 +48,17 @@ class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True)
 
     class Meta:
+        """Настройка сериализатора."""
         model = Title
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
 
     def validate_year(self, value):
+        """Валидация года выпуска произведения."""
+
         current_year = dt.date.today().year
+
         if not 0 < value <= current_year:
             raise serializers.ValidationError(
                 'Размещение не вышедшего материала не возможно.'

@@ -1,8 +1,19 @@
 from rest_framework import permissions
 from users.models import User
 
-"""для себя: В юзерс тоже прописаны пермишены.
-Нужно обсудить, если что не забыть поменять все."""
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    """Все не безопасные методы доступны только админу."""
+
+    message = 'Недостаточно прав'
+
+    def has_permission(self, request, view):
+        """обощеуровневое разрешение."""
+        return (
+                (request.user.is_authenticated
+                 and (request.user.is_admin or request.user.is_superuser)
+                 ) or request.method in permissions.SAFE_METHODS
+            )
 
 
 class AuthorAdminModerOrReadOnly(permissions.BasePermission):
@@ -18,15 +29,3 @@ class AuthorAdminModerOrReadOnly(permissions.BasePermission):
             return True
         user = User.objects.get(username=request.user)
         return user.role in ('admin', 'moderator')
-
-
-class IsAdminOrReadOnly(permissions.BasePermission):
-    """Админ или чтение."""
-    def has_permission(self, request, view):
-        return (
-            request.method in permissions.SAFE_METHODS
-            or (request.user.is_authenticated
-                and request.user.role == 'admin')
-            or (request.user.is_staff
-                or request.user.is_superuser)
-            )
