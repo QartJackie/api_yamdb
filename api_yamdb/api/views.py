@@ -1,35 +1,40 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from api.pagination import ReviewPagination
-"""
-Ниже инпортированы пермишены из апи и юзерс.
-Нужно выбрать, откуда будем ипортировать. Еслии это юзерс,
-то нужны пермишены под доки, данные не совсем подходят.
-"""
-from api.permissions import AuthorAdminModerOrReadOnly
-from users.permissions import IsAdminOrReadOnly
+from api.filters import CustomTitleFilter
+from api.mixins import ListCreateDestroyViewSet
+from api.pagination import LimitOffsetPagination
+from api.permissions import AuthorAdminModerOrReadOnly, IsAdminOrReadOnly
 from api.serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer,
-    ReviewSerializer, TitleSerializer)
+    ReviewSerializer, TitleSerializer
+)
 from reviews.models import Category, Genre, Title, Comment, Review
 
 
-class CategoriesViewSet(viewsets.ModelViewSet):
+class CategoriesViewSet(ListCreateDestroyViewSet):
     """ViewSet для категорий"""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = ReviewPagination
-    # permissions and filters
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(ListCreateDestroyViewSet):
     """VewSet для жанров"""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly, )
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -38,13 +43,16 @@ class TitleViewSet(viewsets.ModelViewSet):
         rating=Avg('reviews__score')
     ).order_by('name')
     serializer_class = TitleSerializer
-    # permissions and filters
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = CustomTitleFilter
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """ViewSet для отзывов."""
     serializer_class = ReviewSerializer
-    pagination_class = ReviewPagination
+    pagination_class = LimitOffsetPagination
 #    permission_classes = [AuthorAdminModerOrReadOnly, ]
 #    permission_classes = [AllowAny, ]
 
