@@ -130,7 +130,7 @@ Cоздать и активировать виртуальное окружен�
 
 <br>
 
-<img src="https://ic.wampi.ru/2023/03/04/8725846_github_alt_icon.png" alt="8725846_github_alt_icon.png" border="0" > </img> **Закиров Максим** <a href="">GitHub</a>
+<img src="https://ic.wampi.ru/2023/03/04/8725846_github_alt_icon.png" alt="8725846_github_alt_icon.png" border="0" > </img> **Закиров Максим** <a href="https://github.com/maxzok">GitHub</a>
 
 <img src="https://ic.wampi.ru/2023/03/04/8725846_github_alt_icon.png" alt="8725846_github_alt_icon.png" border="0"></img>  **Маргарита Манисян** <a href="">GitHub</a>
 
