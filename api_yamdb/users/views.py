@@ -39,8 +39,8 @@ class APIGetToken(APIView):
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = request.data.get('username')
-        confirmation_code = request.data.get('confirmation_code')
+        username = serializer.data.get('username')
+        confirmation_code = serializer.data.get('confirmation_code')
         user = get_object_or_404(
             User,
             username=username,
@@ -66,36 +66,36 @@ class APISignUp(APIView):
 
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            email = request.data['email']
-            if User.objects.filter(
-                email=request.data['email'], username=request.data['username']
-            ).exists():
-                send_email(
-                    email=request.data['email'],
-                    username=request.data['username']
-                )
-                return Response(
-                    'Данный пользователь уже существует,'
-                    f'Вам на почту {email} отправлен код подтверждения',
-                    status=status.HTTP_200_OK
-                )
-            elif User.objects.filter(email=request.data['email']).exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            elif User.objects.filter(
-                username=request.data['username']
-            ).exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-            send_email(serializer.data['email'], serializer.data['username'])
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data.get('username')
+        if User.objects.filter(
+            email=email, username=username
+        ).exists():
+            send_email(
+                email=email,
+                username=username
+            )
             return Response(
-                {
-                    'email': serializer.data['email'],
-                    'username': serializer.data['username']
-                },
+                'Данный пользователь уже существует,'
+                f'Вам на почту {email} отправлен код подтверждения',
                 status=status.HTTP_200_OK
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif User.objects.filter(email=email).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        elif User.objects.filter(
+            username=username
+        ).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        send_email(email, username)
+        return Response(
+            {
+                'email': email,
+                'username': username
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class APIUser(viewsets.ModelViewSet):
