@@ -15,6 +15,9 @@ from api.serializers import (
 from reviews.models import Category, Genre, Title, Comment, Review
 
 
+CRUD_METHODS_EXCEPT_PUT = ['get', 'post', 'patch', 'delete']
+
+
 class CategoriesViewSet(ListCreateDestroyViewSet):
     """ViewSet для категорий"""
     queryset = Category.objects.all()
@@ -54,19 +57,21 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = [AuthorAdminModerOrReadOnly, ]
-    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    http_method_names = CRUD_METHODS_EXCEPT_PUT
+
+    def get_title(self):
+        """Получение произведения."""
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title
 
     def get_queryset(self):
-        """Получение кверисета с произведениями."""
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        return Review.objects.filter(title=title)
+        """Получение кверисета с отзывами."""
+        return Review.objects.filter(title=self.get_title())
 
     def perform_create(self, serializer):
         """Функция создания ревью."""
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        print(title.id)
         serializer.save(author=self.request.user,
-                        title=title)
+                        title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -74,15 +79,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = [AuthorAdminModerOrReadOnly, ]
-    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    http_method_names = CRUD_METHODS_EXCEPT_PUT
+
+    def get_review(self):
+        """Получение ревью."""
+        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
 
     def get_queryset(self):
-        """Получение кверисета с ревью."""
-        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
-        return Comment.objects.filter(review=review)
+        """Получение кверисета с комментариями."""
+        return Comment.objects.filter(review=self.get_review())
 
     def perform_create(self, serializer):
         """Создание комментария."""
         serializer.save(
             author=self.request.user,
-            review=get_object_or_404(Review, id=self.kwargs.get('review_id')))
+            review=self.get_review())
