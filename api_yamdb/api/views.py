@@ -54,7 +54,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = [AuthorAdminModerOrReadOnly, ]
-    http_method_names = ['get', 'post', 'head','patch', 'delete']
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def get_queryset(self):
         """Получение кверисета с произведениями."""
@@ -74,6 +74,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = [AuthorAdminModerOrReadOnly, ]
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def get_queryset(self):
         """Получение кверисета с ревью."""

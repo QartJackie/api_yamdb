@@ -8,20 +8,18 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """обощеуровневое разрешение."""
-        return (
-                (request.user.is_authenticated
+        return ((request.user.is_authenticated
                  and (request.user.is_admin or request.user.is_superuser)
-                 ) or request.method in permissions.SAFE_METHODS
-        )
+                 ) or request.method in permissions.SAFE_METHODS)
 
 
 class AuthorAdminModerOrReadOnly(permissions.BasePermission):
+    """Не безопасные методы доступны только админу, модератору и автору."""
 
     message = 'Недостаточно прав'
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
-#                or (request.user.is_authenticated and request.method != 'PUT')
                 or (request.user.is_authenticated)
                 )
 
@@ -29,5 +27,4 @@ class AuthorAdminModerOrReadOnly(permissions.BasePermission):
         return (request.method in permissions.SAFE_METHODS
                 or obj.author == request.user
                 or request.user.is_admin
-                or request.user.is_moderator
-                or request.user.is_superuser)
+                or request.user.is_moderator)
