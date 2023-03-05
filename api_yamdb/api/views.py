@@ -53,8 +53,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """ViewSet для отзывов."""
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-#    permission_classes = [AuthorAdminModerOrReadOnly, ]
-#    permission_classes = [AllowAny, ]
+    permission_classes = [AuthorAdminModerOrReadOnly, ]
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def get_queryset(self):
         """Получение кверисета с произведениями."""
@@ -63,14 +63,18 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Функция создания ревью."""
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        print(title.id)
         serializer.save(author=self.request.user,
-                        title=Title.objects.get(id=self.kwargs.get('title_id')))
+                        title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     """ViewSet для комментариев."""
     serializer_class = CommentSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = [AuthorAdminModerOrReadOnly, ]
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def get_queryset(self):
         """Получение кверисета с ревью."""
@@ -79,5 +83,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Создание комментария."""
-        serializer.save(author=self.request.user,
-                        review=Review.objects.get(id=self.kwargs.get('review_id')))
+        serializer.save(
+            author=self.request.user,
+            review=get_object_or_404(Review, id=self.kwargs.get('review_id')))

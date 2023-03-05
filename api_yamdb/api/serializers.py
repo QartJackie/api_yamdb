@@ -1,8 +1,8 @@
 import datetime as dt
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from django.shortcuts import get_object_or_404
 
-from reviews.models import Category,  Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
@@ -67,26 +67,34 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор для отзывов."""
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+        read_only=True, slug_field='username',
+        default=serializers.CurrentUserDefault()
     )
 
     class Meta:
         model = Review
         fields = ('id', 'title', 'author', 'pub_date', 'text', 'score', )
         read_only_fields = ('title', 'author', 'pub_date', )
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('author', 'title'),
-                message='Вы уже оставили отзыв на данное произведение.'
-            )
-        ]
+
+    def validate(self, data):
+        request = self.context['request']
+        title_id = self.context.get('view').kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        if (request.method == 'POST'
+            and Review.objects.filter(title=title,
+                                      author=request.user).exists()):
+            raise serializers.ValidationError(
+                'Вы уже оставили отзыв на данное произведение.')
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для комментариев."""
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+        read_only=True, slug_field='username',
+        default=serializers.CurrentUserDefault()
     )
 
     class Meta:
