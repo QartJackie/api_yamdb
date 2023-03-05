@@ -52,14 +52,16 @@ class Title(models.Model):
         Category,
         on_delete=models.CASCADE,
         related_name='titles',
-        verbose_name='Категория'
+        verbose_name='Категория',
+        help_text='Категория произведения'
     )
     description = models.TextField('Описание', blank=True, null=True)
     genre = models.ManyToManyField(
         Genre,
         blank=True,
         related_name='titles',
-        verbose_name='Жанр'
+        verbose_name='Жанр',
+        help_text='Жанр произведения'
     )
     year = models.IntegerField('Год публикации')
 
@@ -92,8 +94,9 @@ class Review(models.Model):
     class Meta:
         """Настройка уникальности и отображения объектов."""
         constraints = [
-            models.UniqueConstraint(fields=['author', 'title'],
-                                    name='unique_author_title')
+            models.UniqueConstraint(
+                fields=('author', 'title'),
+                name='unique_author_title')
         ]
         ordering = ['-pub_date']
         verbose_name = 'Отзыв'
@@ -107,12 +110,14 @@ class Review(models.Model):
 class Comment(models.Model):
     """Модель комментария."""
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments')
+        User, on_delete=models.CASCADE, related_name='comments',
+        help_text='Автор'
+    )
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments',
         help_text='Ревью'
     )
-    text = models.TextField()
+    text = models.TextField('Текст комментария')
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )

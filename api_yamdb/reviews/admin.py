@@ -4,7 +4,7 @@ from reviews.models import Category, Comment, Genre, Title, Review
 
 
 class CategoryAdmin(admin.ModelAdmin):
-
+    """Регистрация категорий."""
     list_display = (
         'id',
         'name',
@@ -18,7 +18,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
-
+    """Регистрация комментариев."""
     list_display = (
         'id',
         'text',
@@ -31,7 +31,7 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 class GenreAdmin(admin.ModelAdmin):
-
+    """Регистрация жанров."""
     list_display = (
         'id',
         'name',
@@ -44,7 +44,7 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 class TitleAdmin(admin.ModelAdmin):
-
+    """Регистрация произведений."""
     list_display = (
         'id',
         'name',
@@ -60,7 +60,7 @@ class TitleAdmin(admin.ModelAdmin):
 
 
 class ReviewAdmin(admin.ModelAdmin):
-
+    """Регистрация отзывов."""
     list_display = (
         'id',
         'title_id',
