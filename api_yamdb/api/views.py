@@ -1,8 +1,7 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
 
 from api.filters import CustomTitleFilter
 from api.mixins import ListCreateDestroyViewSet
@@ -87,10 +86,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Получение кверисета с комментариями."""
-        return Comment.objects.filter(review=self.get_review())
+        return Comment.objects.filter(
+            review=self.get_review()
+        )
 
     def perform_create(self, serializer):
         """Создание комментария."""
         serializer.save(
-            author=self.request.user,
-            review=self.get_review())
+            author=self.request.user, review=self.get_review()
+        )

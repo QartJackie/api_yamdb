@@ -7,18 +7,19 @@ from django.core.management.base import BaseCommand
 
 CSV_DATA_PATH = f'{settings.BASE_DIR}/static/data/'
 DATA_TABLES = (
-            ('titles.csv', 'reviews_title'),
-            ('users.csv', 'users_customuser'),
-            ('review.csv', 'reviews_review'),
-            ('category.csv', 'reviews_category'),
-            ('comments.csv', 'reviews_comment'),
-            ('genre_title.csv', 'reviews_title_genre'),
-            ('genre.csv', 'reviews_genre'),
-        )
+    ('titles.csv', 'reviews_title'),
+    ('users.csv', 'users_customuser'),
+    ('review.csv', 'reviews_review'),
+    ('category.csv', 'reviews_category'),
+    ('comments.csv', 'reviews_comment'),
+    ('genre_title.csv', 'reviews_title_genre'),
+    ('genre.csv', 'reviews_genre'),
+)
 DATABASE_NAME = 'db.sqlite3'
 
 
 class Command(BaseCommand):
+    """Импорт CSV"""
 
     def base_connection(self):
         """Подключение к базе."""

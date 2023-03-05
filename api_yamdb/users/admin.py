@@ -3,6 +3,7 @@ from users.models import User
 
 
 class UserAdmin(admin.ModelAdmin):
+    """Регистрация модели пользователя."""
     list_display = (
         'id',
         'first_name',

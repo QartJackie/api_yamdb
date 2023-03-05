@@ -4,6 +4,7 @@ from reviews.models import Title
 
 class CustomTitleFilter(FilterSet):
     """Кастомный фильтр для произведений"""
+
     name = filters.CharFilter(
         field_name='name',
         lookup_expr='icontains'
@@ -21,5 +22,6 @@ class CustomTitleFilter(FilterSet):
         lookup_expr='icontains')
 
     class Meta:
+        """Поля фильтрации."""
         model = Title
         fields = ('name', 'year', 'category', 'genre')

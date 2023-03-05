@@ -6,20 +6,28 @@ from .models import User
 
 
 class GetTokenSerializer(serializers.Serializer):
+    """Сериализатор токена."""
+
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
 
 class UserSerializer(serializers.Serializer):
+    """Сериализатор User'ов."""
+
     email = serializers.EmailField(required=True, max_length=254)
     username = serializers.SlugField(required=True, max_length=150)
 
     def validate(self, validated_data):
+        """Валидация логина."""
+
         if validated_data['username'] == 'me':
             raise ValidationError('Данное имя недоступно')
         return validated_data
 
     def create(self, validated_data):
+        """Функция добавления пользователя."""
+
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email']
@@ -27,11 +35,14 @@ class UserSerializer(serializers.Serializer):
         return user
 
     class Meta:
+        """Настройка выдачи."""
+
         model = User
         fields = ('email', 'username')
 
 
 class UserSearchSerializer(serializers.ModelSerializer):
+    """Сериализатор выдачи пользоватлей."""
 
     email = serializers.EmailField(
         required=True,
@@ -46,18 +57,24 @@ class UserSearchSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, validated_data):
+        """Проверка поля username."""
+
         username = validated_data.get('username', None)
         if username == 'me':
             raise ValidationError('Данное имя недоступно')
         return validated_data
 
     def create(self, validated_data):
+        """Создание модели поьзователя."""
+
         user = User.objects.create_user(
             **validated_data
         )
         return user
 
     class Meta:
+        """Настройка выдачи."""
+
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'role', 'bio'
@@ -65,6 +82,8 @@ class UserSearchSerializer(serializers.ModelSerializer):
 
 
 class MeSerializer(serializers.ModelSerializer):
+    """Сериализатор модели User."""
+
     email = serializers.EmailField(
         required=True,
         max_length=254,
@@ -76,15 +95,18 @@ class MeSerializer(serializers.ModelSerializer):
             UniqueValidator(queryset=User.objects.all()),
         ]
     )
-#    role = serializers.CharField(choices=ROLES)
 
     def validate(self, validated_data):
+        """Валидатор логина."""
+
         username = validated_data.get('username', None)
         if username == 'me':
             raise ValidationError('Данное имя недоступно')
         return validated_data
 
     def create(self, validated_data):
+        """Создание пользователя."""
+
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email']
@@ -92,6 +114,8 @@ class MeSerializer(serializers.ModelSerializer):
         return user
 
     class Meta:
+        """Настройка выдачи."""
+
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'role', 'bio'
