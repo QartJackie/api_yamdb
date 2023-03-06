@@ -69,27 +69,19 @@ class APISignUp(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
         username = serializer.validated_data.get('username')
-        if User.objects.filter(
+        if User.objects.get_or_create(
             email=email, username=username
-        ).exists():
+        ):
             send_email(
                 email=email,
                 username=username
             )
             return Response(
-                'Данный пользователь уже существует,'
-                f'Вам на почту {email} отправлен код подтверждения',
-                status=status.HTTP_200_OK
+                {
+                    'email': email,
+                    'username': username
+                }, status=status.HTTP_200_OK
             )
-        serializer.save()
-        send_email(email, username)
-        return Response(
-            {
-                'email': email,
-                'username': username
-            },
-            status=status.HTTP_200_OK
-        )
 
 
 class APIUser(viewsets.ModelViewSet):
