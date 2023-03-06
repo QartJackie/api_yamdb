@@ -5,9 +5,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-from rest_framework.decorators import action
 
 from .permissions import IsAdmin
 from .models import User
@@ -16,13 +16,8 @@ from .serializers import (
 )
 
 
-class EnablePartialUpdateMixin:
-    def patch(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
-
-
 def send_email(email, username):
+    """Отправка эмейла"""
     user = get_object_or_404(User, username=username)
     conf_code = user.confirmation_code
     send_mail(
@@ -34,13 +29,15 @@ def send_email(email, username):
 
 
 class APIGetToken(APIView):
+    """Получение токена пользователем"""
     permission_classes = (AllowAny,)
 
     def post(self, request):
+        """Проверка совпадния пользователя и его кода"""
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = request.data.get('username')
-        confirmation_code = request.data.get('confirmation_code')
+        username = serializer.data.get('username')
+        confirmation_code = serializer.data.get('confirmation_code')
         user = get_object_or_404(
             User,
             username=username,
@@ -62,43 +59,32 @@ class APIGetToken(APIView):
 
 
 class APISignUp(APIView):
+    """Регистраия пользователя"""
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
+        """Проверка существования пользователя и создание нового"""
         serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            email = request.data['email']
-            if User.objects.filter(
-                email=request.data['email'], username=request.data['username']
-            ).exists():
-                send_email(
-                    email=request.data['email'],
-                    username=request.data['username']
-                )
-                return Response(
-                    'Данный пользователь уже существует,'
-                    f'Вам на почту {email} отправлен код подтверждения',
-                    status=status.HTTP_200_OK
-                )
-            elif User.objects.filter(email=request.data['email']).exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            elif User.objects.filter(
-                username=request.data['username']
-            ).exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-            send_email(serializer.data['email'], serializer.data['username'])
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data.get('username')
+        if User.objects.get_or_create(
+            email=email, username=username
+        ):
+            send_email(
+                email=email,
+                username=username
+            )
             return Response(
                 {
-                    'email': serializer.data['email'],
-                    'username': serializer.data['username']
-                },
-                status=status.HTTP_200_OK
+                    'email': email,
+                    'username': username
+                }, status=status.HTTP_200_OK
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class APIUser(viewsets.ModelViewSet):
+    """Вьюсет ендпоинта users"""
     queryset = User.objects.all()
     lookup_field = 'username'
     serializer_class = UserSearchSerializer
@@ -109,6 +95,7 @@ class APIUser(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
+        """Создание пользователя админом"""
         serializer.save()
         return serializer.data
 
@@ -123,6 +110,7 @@ class APIUser(viewsets.ModelViewSet):
         serializer_class=MeSerializer,
     )
     def users_own_profile(self, request):
+        """Получение и редактирование данных черех users/me/"""
         user = request.user
         if request.method == "GET":
             serializer = self.get_serializer(user)
