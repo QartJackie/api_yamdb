@@ -16,13 +16,8 @@ from .serializers import (
 )
 
 
-class EnablePartialUpdateMixin:
-    def patch(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
-
-
 def send_email(email, username):
+    """Отправка эмейла"""
     user = get_object_or_404(User, username=username)
     conf_code = user.confirmation_code
     send_mail(
@@ -34,9 +29,11 @@ def send_email(email, username):
 
 
 class APIGetToken(APIView):
+    """Получение токена пользователем"""
     permission_classes = (AllowAny,)
 
     def post(self, request):
+        """Проверка совпадния пользователя и его кода"""
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.data.get('username')
@@ -62,9 +59,11 @@ class APIGetToken(APIView):
 
 
 class APISignUp(APIView):
+    """Регистраия пользователя"""
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
+        """Проверка существования пользователя и создание нового"""
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
@@ -85,6 +84,7 @@ class APISignUp(APIView):
 
 
 class APIUser(viewsets.ModelViewSet):
+    """Вьюсет ендпоинта users"""
     queryset = User.objects.all()
     lookup_field = 'username'
     serializer_class = UserSearchSerializer
@@ -95,6 +95,7 @@ class APIUser(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
+        """Создание пользователя админом"""
         serializer.save()
         return serializer.data
 
@@ -109,6 +110,7 @@ class APIUser(viewsets.ModelViewSet):
         serializer_class=MeSerializer,
     )
     def users_own_profile(self, request):
+        """Получение и редактирование данных черех users/me/"""
         user = request.user
         if request.method == "GET":
             serializer = self.get_serializer(user)
