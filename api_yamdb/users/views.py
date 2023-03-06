@@ -5,9 +5,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-from rest_framework.decorators import action
 
 from .permissions import IsAdmin
 from .models import User
@@ -81,12 +81,6 @@ class APISignUp(APIView):
                 f'Вам на почту {email} отправлен код подтверждения',
                 status=status.HTTP_200_OK
             )
-        elif User.objects.filter(email=email).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        elif User.objects.filter(
-            username=username
-        ).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         send_email(email, username)
         return Response(

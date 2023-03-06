@@ -36,6 +36,24 @@ class UserSerializer(BaseUserSerializer):
     email = serializers.EmailField(required=True, max_length=254)
     username = serializers.SlugField(required=True, max_length=150)
 
+    def validate(self, data):
+        """Валидация уникальности полей"""
+        users_username = User.objects.filter(username=data['username'])
+        users_email = User.objects.filter(email=data['email'])
+        if data['username'] == 'me':
+            raise ValidationError('Данное имя недоступно')
+        elif users_username.exclude(
+            email=data['email'], username=data['username']
+        ).exists():
+            raise serializers.ValidationError(
+                "Юзернейм должен быть уникальным"
+            )
+        elif users_email.exclude(
+            username=data['username'], email=data['email']
+        ).exists():
+            raise serializers.ValidationError("Эмейл должен быть уникальным")
+        return data
+
     class Meta:
         """Настройка выдачи."""
 
