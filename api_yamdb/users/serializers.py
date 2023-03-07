@@ -1,8 +1,14 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.validators import UniqueValidator
 from django.core.exceptions import ValidationError
+from rest_framework.exceptions import APIException
 
 from .models import User
+
+
+class UsernameDoesntExist(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = 'Данный юзернейм не существует'
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -28,6 +34,14 @@ class GetTokenSerializer(serializers.Serializer):
 
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
+
+    def validate(self, data):
+        user = User.objects.filter(username=data['username'])
+        if not user.exists():
+            raise UsernameDoesntExist
+        elif user.first().confirmation_code != data['confirmation_code']:
+            raise ValidationError('Неверный код')
+        return data
 
 
 class UserSerializer(BaseUserSerializer):

@@ -12,7 +12,7 @@ from django.core.mail import send_mail
 from .permissions import IsAdmin
 from .models import User
 from .serializers import (
-    GetTokenSerializer, UserSerializer, UserSearchSerializer, MeSerializer
+    GetTokenSerializer, UserSerializer, UserSearchSerializer, MeSerializer,
 )
 
 
@@ -36,21 +36,11 @@ class APIGetToken(APIView):
         """Проверка совпадния пользователя и его кода"""
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.data.get('username')
-        confirmation_code = serializer.data.get('confirmation_code')
+        username = serializer.validated_data.get('username')
         user = get_object_or_404(
             User,
             username=username,
         )
-        if not User.objects.filter(username=username).exists():
-            return Response(
-                'Пользователь с таким именем не существует',
-                status=status.HTTP_404_NOT_FOUND
-            )
-        if user.confirmation_code != confirmation_code:
-            return Response(
-                'Неверный код',
-                status=status.HTTP_400_BAD_REQUEST)
         refresh = RefreshToken.for_user(user)
         return Response(
             {'access_token': str(refresh.access_token)},
